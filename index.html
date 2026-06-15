@@ -40,11 +40,18 @@
   input,select,textarea{-webkit-user-select:text;user-select:text}
 
   #root{
-    height:100dvh; max-width:520px; margin:0 auto;
+    height:var(--app-h, 100dvh); max-width:520px; margin:0 auto;
     padding:10px;
     padding-top:max(10px, env(safe-area-inset-top));
     padding-bottom:max(6px, env(safe-area-inset-bottom));
     display:flex; flex-direction:column; gap:8px;
+  }
+
+  /* 画面最上部のタイトル */
+  .app-title{
+    text-align:center; font-size:17px; font-weight:700;
+    letter-spacing:.02em; color:var(--ink);
+    margin:2px 0 6px; flex:0 0 auto;
   }
 
   /* ヘッダー */
@@ -56,7 +63,7 @@
   .card{background:var(--card); border:1px solid var(--line); border-radius:14px;}
 
   /* 入力フォーム */
-  .form{padding:8px; display:grid; grid-template-columns:1.3fr 1fr; gap:6px}
+  .form{padding:8px; display:grid; grid-template-columns:1fr 1fr; gap:6px}
   .form .full{grid-column:1 / -1}
   .form label{font-size:10px; color:var(--muted); display:block; margin:0 0 2px 2px}
   .ctl{width:100%; padding:8px; border:1px solid var(--line); border-radius:9px; font-size:14px; background:#fbfcfe; color:var(--ink); height:38px; line-height:20px}
@@ -77,7 +84,8 @@
   .scroll::-webkit-scrollbar{width:5px}
   .scroll::-webkit-scrollbar-thumb{background:#d4dae6; border-radius:4px}
 
-  .item{display:flex; align-items:center; gap:6px; padding:7px 8px; border-radius:9px; background:#f7f9fc; margin-bottom:6px}
+  .item{display:flex; align-items:center; gap:6px; padding:7px 8px; border-radius:9px; background:#f7f9fc; margin-bottom:6px; cursor:pointer}
+  .item:active{background:#eef2f9}
   .item .body{flex:1; min-width:0}
   .item .name{font-size:13px; font-weight:600}
   .item .meta{font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
@@ -91,9 +99,10 @@
   .more-btn:active{background:#e2e8f4}
 
   /* 凡例 */
-  .legend{display:flex; gap:12px; justify-content:center; font-size:11px; color:var(--muted)}
+  .legend{display:flex; gap:10px; justify-content:center; font-size:11px; color:var(--muted); flex-wrap:wrap}
   .legend span{display:flex; align-items:center; gap:4px}
   .dot{width:9px;height:9px;border-radius:50%}
+  .dot.n{background:#3c4d78; border:1px solid #9aabd8}
   .dot.b{background:var(--blue); box-shadow:0 0 6px var(--blue)}
   .dot.g{background:var(--green); box-shadow:0 0 6px var(--green)}
   .dot.r{background:var(--red); box-shadow:0 0 6px var(--red)}
@@ -107,13 +116,42 @@
   }
   .map-svg svg{width:100%; height:100%; display:block; pointer-events:none}
 
-  /* 都道府県の見た目 */
-  .prefecture{fill:#2b3a63; stroke:#0c1430; stroke-width:1; transition:fill .25s ease}
-  .prefecture.pref-v1{fill:var(--blue);  filter:drop-shadow(0 0 2px var(--blue))  drop-shadow(0 0 6px var(--blue))}
-  .prefecture.pref-v2{fill:var(--green); filter:drop-shadow(0 0 2px var(--green)) drop-shadow(0 0 6px var(--green))}
-  .prefecture.pref-v3{fill:var(--red);   filter:drop-shadow(0 0 2px var(--red))   drop-shadow(0 0 7px var(--red))}
-  .oki-box{fill:rgba(255,255,255,.03); stroke:#3a4a78; stroke-width:1.5}
-  .oki-label{fill:#6b79a6; font-size:22px; font-family:inherit}
+  /* 都道府県の見た目（暗い背景でも県境が見えるよう境界線を明るく） */
+  .prefecture{fill:#3c4d78; stroke:#9aabd8; stroke-width:0.9; transition:fill .25s ease, stroke .25s ease}
+  .prefecture.pref-v1{fill:var(--blue);  stroke:#eaf7ff; filter:drop-shadow(0 0 2px var(--blue))  drop-shadow(0 0 6px var(--blue))}
+  .prefecture.pref-v2{fill:var(--green); stroke:#e9fff6; filter:drop-shadow(0 0 2px var(--green)) drop-shadow(0 0 6px var(--green))}
+  .prefecture.pref-v3{fill:var(--red);   stroke:#fff0f3; filter:drop-shadow(0 0 2px var(--red))   drop-shadow(0 0 7px var(--red))}
+  .oki-box{fill:rgba(255,255,255,.05); stroke:#6376a8; stroke-width:1.5}
+  .oki-label{fill:#aab9e6; font-size:22px; font-family:inherit}
+
+  /* モーダル / ボトムシート / 確認ダイアログ */
+  .overlay{position:fixed; inset:0; z-index:50; background:rgba(12,18,40,.45);
+           display:flex; align-items:flex-end; justify-content:center; animation:fade .15s ease}
+  .overlay.center{align-items:center}
+  .sheet{width:100%; max-width:520px; background:var(--card);
+         border-radius:18px 18px 0 0; padding:16px;
+         padding-bottom:calc(16px + env(safe-area-inset-bottom));
+         box-shadow:0 -8px 30px rgba(0,0,0,.22); animation:slideup .2s ease}
+  .sheet h3{margin:2px 0 12px; font-size:16px; font-weight:700; text-align:center}
+  .sheet .row{display:flex; justify-content:space-between; gap:12px; padding:10px 2px;
+              border-bottom:1px solid var(--line); font-size:14px}
+  .sheet .row:last-of-type{border-bottom:none}
+  .sheet .row .k{color:var(--muted); flex:none}
+  .sheet .row .v{font-weight:600; text-align:right; word-break:break-word}
+  .flbl{font-size:11px; color:var(--muted); margin:10px 2px 4px; display:block}
+  .sheet .ctl{margin-bottom:2px}
+  .acts{display:flex; gap:10px; margin-top:16px}
+  .acts .btn{flex:1; padding:12px}
+  .btn.ghost{background:#eef1f7; color:#48506a}
+  .btn.danger{background:#ff4d6a; color:#fff}
+  .dialog{width:86%; max-width:320px; background:var(--card); border-radius:16px;
+          padding:20px 18px 16px; text-align:center; box-shadow:0 12px 40px rgba(0,0,0,.25);
+          animation:pop .16s ease}
+  .dialog p{margin:0 0 4px; font-size:15px; font-weight:600}
+  .dialog .sub{font-size:12px; color:var(--muted); margin:0 0 6px}
+  @keyframes slideup{from{transform:translateY(100%)} to{transform:translateY(0)}}
+  @keyframes fade{from{opacity:0} to{opacity:1}}
+  @keyframes pop{from{transform:scale(.94); opacity:.6} to{transform:scale(1); opacity:1}}
 </style>
 </head>
 <body>
@@ -362,9 +400,27 @@ const NAME_BY_CODE = Object.fromEntries(PREFS.map(p=>[p.code,p.name]));
 
 /* ===== ローカル保存（端末内に保存・閉じても残る） ===== */
 const STORAGE_KEY = "travel-log-v1";
+function uid(){ return Date.now()+"-"+Math.random().toString(36).slice(2,6); }
+
 function loadData(){
-  try{ const raw = localStorage.getItem(STORAGE_KEY); if(raw) return JSON.parse(raw); }
-  catch(e){ /* プレビュー等で保存不可でも落とさない */ }
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const d = JSON.parse(raw);
+      // 旧データを新形式へ自動移行（単一日付→開始/終了、行きたい数値→オブジェクト）
+      const visited = (d.visited||[]).map(v=>({
+        id: v.id||uid(), code: v.code,
+        start: v.start || v.date || today(),
+        end:   v.end   || v.date || v.start || today(),
+        memo:  v.memo || ""
+      }));
+      const wishlist = (d.wishlist||[]).map(w=>{
+        if(typeof w === "number") return { id:uid(), code:w, place:"", memo:"", addedAt:Date.now() };
+        return { id:w.id||uid(), code:w.code, place:w.place||"", memo:w.memo||"", addedAt:w.addedAt||Date.now() };
+      });
+      return { visited, wishlist };
+    }
+  }catch(e){ /* プレビュー等で読めなくても落とさない */ }
   return { visited:[], wishlist:[] };
 }
 function saveData(data){
@@ -376,6 +432,20 @@ function today(){
   const d=new Date(), z=n=>String(n).padStart(2,"0");
   return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;
 }
+/* 表示用整形： yyyy-mm-dd → yyyy/mm/dd、範囲表示 */
+function fmt(d){ return d ? d.replace(/-/g,"/") : ""; }
+function rangeText(it){
+  const s=fmt(it.start), e=fmt(it.end);
+  if(!s) return "";
+  return (e && e!==s) ? s+"〜"+e : s;
+}
+/* iOSで地図下に余白が出る原因＝高さ計算のズレ。実際の表示領域を測って高さに使う */
+function setAppHeight(){
+  document.documentElement.style.setProperty("--app-h", window.innerHeight + "px");
+}
+setAppHeight();
+window.addEventListener("resize", setAppHeight);
+window.addEventListener("orientationchange", ()=> setTimeout(setAppHeight, 200));
 
 /* ===== 日本地図パネル（閲覧専用・訪問回数で発光） ===== */
 function MapPanel({ counts }){
@@ -400,19 +470,23 @@ function MapPanel({ counts }){
   return <div className="map-svg" ref={ref} aria-label="日本地図"></div>;
 }
 
-/* ===== 行った場所 入力フォーム ===== */
+/* ===== 行った場所 入力フォーム（日付範囲対応） ===== */
 function VisitForm({ onAdd }){
   const [code,setCode]=useState("");
-  const [date,setDate]=useState(today());
+  const [start,setStart]=useState(today());
+  const [end,setEnd]=useState(today());
   const [memo,setMemo]=useState("");
+  const onStart=v=>{ setStart(v); if(v && end < v) setEnd(v); };   // 開始>終了なら終了を合わせる
+  const onEnd=v=>{ setEnd(v && v < start ? start : v); };
   const submit=()=>{
-    if(!code) return;                 // 県未選択は無視
-    onAdd(Number(code), date||today(), memo.trim());
-    setCode(""); setMemo(""); setDate(today());   // 入力をリセット
+    if(!code) return;                       // 県未選択は無視
+    const s=start||today(); let e=end||s; if(e<s) e=s;
+    onAdd(Number(code), s, e, memo.trim());
+    setCode(""); setStart(today()); setEnd(today()); setMemo("");
   };
   return (
     <div className="card form">
-      <div>
+      <div className="full">
         <label>行った県</label>
         <select className="ctl" value={code} onChange={e=>setCode(e.target.value)}>
           <option value="">選択してください</option>
@@ -420,8 +494,12 @@ function VisitForm({ onAdd }){
         </select>
       </div>
       <div>
-        <label>日付</label>
-        <input className="ctl" type="date" value={date} onChange={e=>setDate(e.target.value)} />
+        <label>開始日</label>
+        <input className="ctl" type="date" value={start} onChange={e=>onStart(e.target.value)} />
+      </div>
+      <div>
+        <label>終了日</label>
+        <input className="ctl" type="date" value={end} min={start} onChange={e=>onEnd(e.target.value)} />
       </div>
       <div className="full">
         <label>メモ</label>
@@ -433,7 +511,7 @@ function VisitForm({ onAdd }){
 }
 
 /* ===== 行ったリスト ===== */
-function VisitedList({ items, onDelete }){
+function VisitedList({ items, onOpen, onAskDelete }){
   const [open,setOpen]=useState(false);            // もっと見るの開閉
   const shown = open ? items : items.slice(0,5);   // 直近5件だけ表示
   return (
@@ -442,12 +520,12 @@ function VisitedList({ items, onDelete }){
       <div className="scroll">
         {items.length===0 && <div className="empty">まだ記録がありません</div>}
         {shown.map(it=>(
-          <div className="item" key={it.id}>
+          <div className="item" key={it.id} onClick={()=>onOpen(it)}>
             <div className="body">
               <div className="name">{NAME_BY_CODE[it.code]}</div>
-              <div className="meta">{it.date}{it.memo? "・"+it.memo : ""}</div>
+              <div className="meta">{rangeText(it)}{it.memo? "・"+it.memo : ""}</div>
             </div>
-            <button className="icon x" onClick={()=>onDelete(it.id)} title="削除">×</button>
+            <button className="icon x" onClick={e=>{e.stopPropagation(); onAskDelete(it);}} title="削除">×</button>
           </div>
         ))}
         {items.length>5 && (
@@ -461,10 +539,11 @@ function VisitedList({ items, onDelete }){
 }
 
 /* ===== 行きたいリスト（追加フォーム＋一覧） ===== */
-function Wishlist({ items, visitedCodes, onAddWish, onRemoveWish, onMarkVisited }){
+function Wishlist({ items, onAddWish, onOpen, onAskDelete, onMarkVisited }){
   const [code,setCode]=useState("");
   const [open,setOpen]=useState(false);   // もっと見るの開閉
   const add=()=>{ if(!code) return; onAddWish(Number(code)); setCode(""); };
+  const shown = open ? items : items.slice(0,5);
   return (
     <div className="card col">
       <div className="ttl">行きたい <span className="cnt">{items.length}件</span></div>
@@ -477,11 +556,14 @@ function Wishlist({ items, visitedCodes, onAddWish, onRemoveWish, onMarkVisited 
       </div>
       <div className="scroll">
         {items.length===0 && <div className="empty">行きたい場所を追加</div>}
-        {(open ? items : items.slice(0,5)).map(c=>(
-          <div className="item" key={c}>
-            <div className="body"><div className="name">{NAME_BY_CODE[c]}</div></div>
-            <button className="icon ok" onClick={()=>onMarkVisited(c)} title="行ったに記録">✓</button>
-            <button className="icon x" onClick={()=>onRemoveWish(c)} title="削除">×</button>
+        {shown.map(it=>(
+          <div className="item" key={it.id} onClick={()=>onOpen(it)}>
+            <div className="body">
+              <div className="name">{NAME_BY_CODE[it.code]}</div>
+              {it.place ? <div className="meta">{it.place}</div> : <div className="meta" style={{color:"#b3bccd"}}>タップで場所・メモ追加</div>}
+            </div>
+            <button className="icon ok" onClick={e=>{e.stopPropagation(); onMarkVisited(it);}} title="行ったに記録">✓</button>
+            <button className="icon x" onClick={e=>{e.stopPropagation(); onAskDelete(it);}} title="削除">×</button>
           </div>
         ))}
         {items.length>5 && (
@@ -494,61 +576,138 @@ function Wishlist({ items, visitedCodes, onAddWish, onRemoveWish, onMarkVisited 
   );
 }
 
+/* ===== 確認ダイアログ（誤タップ削除を防ぐ） ===== */
+function ConfirmDialog({ onCancel, onConfirm }){
+  return (
+    <div className="overlay center" onClick={onCancel}>
+      <div className="dialog" onClick={e=>e.stopPropagation()}>
+        <p>この記録を削除しますか？</p>
+        <div className="sub">この操作は取り消せません</div>
+        <div className="acts">
+          <button className="btn ghost" onClick={onCancel}>キャンセル</button>
+          <button className="btn danger" onClick={onConfirm}>削除</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ===== 行った場所の詳細（閲覧） ===== */
+function VisitedDetail({ item, onClose }){
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="sheet" onClick={e=>e.stopPropagation()}>
+        <h3>{NAME_BY_CODE[item.code]}</h3>
+        <div className="row"><span className="k">日付</span><span className="v">{rangeText(item)}</span></div>
+        <div className="row"><span className="k">メモ</span><span className="v">{item.memo || "（なし）"}</span></div>
+        <div className="acts"><button className="btn ghost" onClick={onClose}>閉じる</button></div>
+      </div>
+    </div>
+  );
+}
+
+/* ===== 行きたい場所の詳細（場所名・メモを入力/閲覧） ===== */
+function WishDetail({ item, onClose, onSave }){
+  const [place,setPlace]=useState(item.place||"");
+  const [memo,setMemo]=useState(item.memo||"");
+  const save=()=>{ onSave(item.id, {place:place.trim(), memo:memo.trim()}); onClose(); };
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="sheet" onClick={e=>e.stopPropagation()}>
+        <h3>{NAME_BY_CODE[item.code]}</h3>
+        <label className="flbl">具体的な場所名</label>
+        <input className="ctl" value={place} onChange={e=>setPlace(e.target.value)} placeholder="例）美ら海水族館" />
+        <label className="flbl">メモ</label>
+        <input className="ctl" value={memo} onChange={e=>setMemo(e.target.value)} placeholder="例）夏に行きたい" />
+        <div className="acts">
+          <button className="btn ghost" onClick={onClose}>閉じる</button>
+          <button className="btn" onClick={save}>保存</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ===== アプリ本体 ===== */
 function App(){
   const init = loadData();
   const [visited,setVisited]   = useState(init.visited);
   const [wishlist,setWishlist] = useState(init.wishlist);
+  const [confirm,setConfirm]   = useState(null);   // 削除確認 {type, item}
+  const [detail,setDetail]     = useState(null);   // 詳細表示 {type, item}
 
   // データが変わるたび保存
   useEffect(()=>{ saveData({visited, wishlist}); },[visited, wishlist]);
+  useEffect(()=>{ setAppHeight(); },[]);            // 起動後に高さを実測
+
+  // ⑥ 自動ソート：行った=開始日の新しい順 / 行きたい=追加日の新しい順
+  const sortedVisited  = useMemo(()=> [...visited].sort((a,b)=> (b.start||"").localeCompare(a.start||"")), [visited]);
+  const sortedWishlist = useMemo(()=> [...wishlist].sort((a,b)=> (b.addedAt||0)-(a.addedAt||0)), [wishlist]);
 
   // 訪問回数を集計（{ "13":2, ... }）
   const counts = useMemo(()=>{
-    const m={};
-    visited.forEach(v=>{ m[v.code]=(m[v.code]||0)+1; });
-    return m;
+    const m={}; visited.forEach(v=>{ m[v.code]=(m[v.code]||0)+1; }); return m;
   },[visited]);
   const visitedCodes = useMemo(()=> new Set(visited.map(v=>v.code)), [visited]);
 
-  // 行った場所を追加 → 行きたいリストから自動削除
-  const addVisit=(code,date,memo)=>{
-    setVisited(prev=>[{id:Date.now()+"-"+Math.random().toString(36).slice(2,6), code, date, memo}, ...prev]);
-    setWishlist(prev=> prev.filter(c=> c!==code));
+  // 行った場所を追加（日付範囲）→ 行きたいから自動削除
+  const addVisit=(code,start,end,memo)=>{
+    setVisited(prev=>[{id:uid(), code, start, end, memo}, ...prev]);
+    setWishlist(prev=> prev.filter(w=> w.code!==code));
   };
   const deleteVisit=(id)=> setVisited(prev=> prev.filter(v=> v.id!==id));
 
   // 行きたい追加（重複・訪問済みは弾く）
   const addWish=(code)=>{
-    if(visitedCodes.has(code)) return;         // 既に行った県は入れない
-    setWishlist(prev=> prev.includes(code) ? prev : [code, ...prev]);
+    if(visitedCodes.has(code)) return;
+    setWishlist(prev=> prev.some(w=>w.code===code) ? prev : [{id:uid(), code, place:"", memo:"", addedAt:Date.now()}, ...prev]);
   };
-  const removeWish=(code)=> setWishlist(prev=> prev.filter(c=> c!==code));
-  // 行きたい→ワンタップで「行った」に記録（今日の日付）
-  const markVisited=(code)=> addVisit(code, today(), "");
+  const updateWish=(id,patch)=> setWishlist(prev=> prev.map(w=> w.id===id ? {...w, ...patch} : w));
+  const removeWish=(id)=> setWishlist(prev=> prev.filter(w=> w.id!==id));
+  // 行きたい→ワンタップで「行った」に記録（今日の日付・メモは引き継ぎ）
+  const markVisited=(w)=> addVisit(w.code, today(), today(), w.memo||"");
+
+  // 削除確認
+  const doConfirm=()=>{
+    if(!confirm) return;
+    if(confirm.type==="visited") deleteVisit(confirm.item.id);
+    else removeWish(confirm.item.id);
+    setConfirm(null);
+  };
 
   return (
     <React.Fragment>
+      <div className="app-title">旅行先リスト</div>
+
       <VisitForm onAdd={addVisit} />
 
       <div className="lists">
-        <VisitedList items={visited} onDelete={deleteVisit} />
+        <VisitedList
+          items={sortedVisited}
+          onOpen={it=> setDetail({type:"visited", item:it})}
+          onAskDelete={it=> setConfirm({type:"visited", item:it})}
+        />
         <Wishlist
-          items={wishlist}
-          visitedCodes={visitedCodes}
+          items={sortedWishlist}
           onAddWish={addWish}
-          onRemoveWish={removeWish}
+          onOpen={it=> setDetail({type:"wish", item:it})}
+          onAskDelete={it=> setConfirm({type:"wish", item:it})}
           onMarkVisited={markVisited}
         />
       </div>
 
       <div className="legend">
+        <span><i className="dot n"></i>未訪問</span>
         <span><i className="dot b"></i>1回</span>
         <span><i className="dot g"></i>2回</span>
         <span><i className="dot r"></i>3回以上</span>
       </div>
 
       <div className="map-wrap"><MapPanel counts={counts} /></div>
+
+      {detail && detail.type==="visited" && <VisitedDetail item={detail.item} onClose={()=>setDetail(null)} />}
+      {detail && detail.type==="wish"    && <WishDetail item={detail.item} onClose={()=>setDetail(null)} onSave={updateWish} />}
+      {confirm && <ConfirmDialog onCancel={()=>setConfirm(null)} onConfirm={doConfirm} />}
     </React.Fragment>
   );
 }

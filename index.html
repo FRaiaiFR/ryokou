@@ -40,7 +40,10 @@
   input,select,textarea{-webkit-user-select:text;user-select:text}
 
   #root{
-    height:100dvh; max-width:520px; margin:0 auto; padding:10px;
+    height:100dvh; max-width:520px; margin:0 auto;
+    padding:10px;
+    padding-top:max(10px, env(safe-area-inset-top));
+    padding-bottom:max(6px, env(safe-area-inset-bottom));
     display:flex; flex-direction:column; gap:8px;
   }
 
@@ -66,7 +69,7 @@
   .btn:active{transform:translateY(1px)}
 
   /* 2つのリスト */
-  .lists{flex:1 1 auto; min-height:0; display:flex; gap:8px}
+  .lists{flex:1 1 0; min-height:0; display:flex; gap:8px}
   .col{flex:1 1 0; min-width:0; display:flex; flex-direction:column}
   .col .ttl{font-size:12px; font-weight:700; padding:8px 10px 6px; display:flex; justify-content:space-between; align-items:center}
   .col .ttl .cnt{font-size:11px; color:var(--muted); font-weight:600}
@@ -95,7 +98,7 @@
   .dot.g{background:var(--green); box-shadow:0 0 6px var(--green)}
   .dot.r{background:var(--red); box-shadow:0 0 6px var(--red)}
 
-  /* 日本地図（正方形・下中央・操作不可） */
+  /* 日本地図（正方形に近い・下中央・操作不可） */
   .map-wrap{flex:0 0 auto; align-self:center; width:min(82vw,34vh); height:min(82vw,34vh)}
   .map-svg{
     width:100%; height:100%; border-radius:16px; overflow:hidden;
@@ -526,11 +529,6 @@ function App(){
 
   return (
     <React.Fragment>
-      <div className="head">
-        <h1>旅の記録</h1>
-        <span className="sub">行った県を光らせよう</span>
-      </div>
-
       <VisitForm onAdd={addVisit} />
 
       <div className="lists">

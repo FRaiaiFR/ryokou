@@ -28,7 +28,7 @@
     --blue:#36c4ff; --green:#2fe39b; --red:#ff5d7d;
   }
   *{box-sizing:border-box}
-  html,body{height:100%;margin:0}
+  html,body{height:100%; margin:0}
   body{
     overflow:hidden; overscroll-behavior:none;
     -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
@@ -76,7 +76,7 @@
   .btn:active{transform:translateY(1px)}
 
   /* 2つのリスト */
-  .lists{flex:1 1 0; min-height:0; display:flex; gap:8px}
+  .lists{flex:1 1 auto; min-height:0; display:flex; gap:8px}
   .col{flex:1 1 0; min-width:0; display:flex; flex-direction:column}
   .col .ttl{font-size:12px; font-weight:700; padding:8px 10px 6px; display:flex; justify-content:space-between; align-items:center}
   .col .ttl .cnt{font-size:11px; color:var(--muted); font-weight:600}
@@ -439,13 +439,16 @@ function rangeText(it){
   if(!s) return "";
   return (e && e!==s) ? s+"〜"+e : s;
 }
-/* iOSで地図下に余白が出る原因＝高さ計算のズレ。実際の表示領域を測って高さに使う */
+/* iOSで地図下に余白が出る原因＝高さ計算のズレ。実際に見えている領域を測って高さに使う */
 function setAppHeight(){
-  document.documentElement.style.setProperty("--app-h", window.innerHeight + "px");
+  const h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+  document.documentElement.style.setProperty("--app-h", Math.round(h) + "px");
 }
 setAppHeight();
+window.addEventListener("load", setAppHeight);
 window.addEventListener("resize", setAppHeight);
-window.addEventListener("orientationchange", ()=> setTimeout(setAppHeight, 200));
+window.addEventListener("orientationchange", ()=> setTimeout(setAppHeight, 300));
+if(window.visualViewport){ window.visualViewport.addEventListener("resize", setAppHeight); }
 
 /* ===== 日本地図パネル（閲覧専用・訪問回数で発光） ===== */
 function MapPanel({ counts }){
